@@ -297,10 +297,10 @@ def MemorialSintetico(layer_name, feature, parent):
     LINHAS = ''
     for k in range(tam):
         linha0 = linha
-        itens = {'Vn': 'P-' + str(k+1).zfill(3),
+        itens = {'Vn': 'M-' + str(k+1).zfill(3),
                     'En': '{:,.2f}'.format(pnts_UTM[k].x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
                     'Nn': '{:,.2f}'.format(pnts_UTM[k].y()).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                    'Ln': 'P-' + str(k+1).zfill(3) + '/' + 'P-' + str(max((k+2)%(tam+1),1)).zfill(3),
+                    'Ln': 'M-' + str(k+1).zfill(3) + '/' + 'M-' + str(max((k+2)%(tam+1),1)).zfill(3),
                     'Az_n': DD2DMS(Az_lista[k]).replace('.', ','),
                     'AzG_n':  DD2DMS(Az_Geo_lista[k]).replace('.', ','),
                     'Dn': '{:,.2f}'.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')

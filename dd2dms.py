@@ -13,7 +13,7 @@ def dd2dms(dd, n_digits, feature, parent):
     """
     if dd != 0:
         graus = int(floor(abs(dd)))
-        resto = round(abs(dd) - graus, 10)
+        resto = round(abs(dd) - graus, 8)
         if dd < 0:
             texto = '-' + str(graus) + '°'
         else:
@@ -21,7 +21,13 @@ def dd2dms(dd, n_digits, feature, parent):
         minutos = int(floor(60*resto))
         resto = round(resto*60 - minutos, 10)
         texto = texto + '{:02d}'.format(minutos) + "'"
-        segundos = resto*60
+        segundos = resto*60        
+        if round(segundos,n_digits) == 60:
+            minutos += 1
+            segundos = 0
+        if minutos == 60:
+            graus += 1
+            minutos = 0
         if n_digits < 1:
             texto = texto + '{:02d}'.format(int(segundos)) + '"'
         else:

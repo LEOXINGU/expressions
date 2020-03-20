@@ -3,6 +3,7 @@ from qgis.gui import *
 from math import atan, pi, sqrt
 import math
 
+
 # Azimutes
 def azimute(A,B):
     # Cálculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
@@ -45,7 +46,7 @@ def DD2DMS(dd):
     degrees,minutes = divmod(minutes,60)
     degrees = str(int(degrees)) if is_positive else '-' + str(int(degrees))
     minutes = int(minutes)
-    return degrees + "&deg;" + str(minutes).zfill(2) + "'" + ("{:.1f}".format(seconds)).zfill(4) + "''"
+    return degrees + "&deg;" + str(minutes).zfill(2) + "\'" + ("{:.1f}".format(seconds)).zfill(4) + '\"'
 
 # Convergência Meridiana
 def ConvMer(pnt, SRC):
@@ -182,7 +183,7 @@ DESCRITIVO SINT&Eacute;TICO<o:p></o:p></span></p>
  style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">COORDENADAS<o:p></o:p></span></p>
       </td>
       <td rowspan="2"
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 130pt;"
+ style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 165pt;"
  width="74">
       <p class="MsoNormal"
  style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
@@ -261,46 +262,38 @@ def MemorialSintetico(layer_name, feature, parent):
     </ul>
     """
     # Camada de Pontos
-    #layer_name = 'Vértices'
     layer = QgsProject.instance().mapLayersByName(layer_name)[0]
     SRC = layer.crs()
-    pnts = []
+    pnts_UTM = {}
+
+    # Transformação de Coordenadas Geográficas para Projetadas no sistema UTM
+    crsDest = QgsCoordinateReferenceSystem(SRC_Projeto('EPSG'))
+    coordinateTransformer = QgsCoordinateTransform()
+    coordinateTransformer.setDestinationCrs(crsDest)
+    coordinateTransformer.setSourceCrs(SRC)
 
     for feat in layer.getFeatures():
-        pnts += [feat.geometry().asMultiPoint()[0]]
-
-        # Lista de Pontos em Coordenadas Geográficas
-        pnts_UTM = []
-        # Transformar Coordenadas Geográficas para Projetadas no sistema UTM
-        crsDest = QgsCoordinateReferenceSystem(SRC_Projeto('EPSG'))
-        coordinateTransformer = QgsCoordinateTransform()
-        coordinateTransformer.setDestinationCrs(crsDest)
-        coordinateTransformer.setSourceCrs(SRC)
-        for pnt in pnts:
-            pnts_UTM += [coordinateTransformer.transform(pnt)]
-    
-    # Lista de Convergência Meridiana
-    ConvMer_list = []
-    for pnt in pnts:
-        ConvMer_list +=[ConvMer(pnt, crsDest)]
+        pnt = feat.geometry().asMultiPoint()[0]
+        pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], ConvMer(pnt, crsDest) ]
 
     # Cálculo dos Azimutes e Distâncias
-    tam = len(pnts)
+    tam = len(pnts_UTM)
     Az_lista, Az_Geo_lista, Dist = [], [], []
     for k in range(tam):
-        pntA = pnts_UTM[k]
-        pntB = pnts_UTM[(k+1)%(tam)]
+        pntA = pnts_UTM[k+1][0]
+        pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
         Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-        Az_Geo_lista += [(180/pi)*azimute(pntA, pntB)[0]+ConvMer_list[k]]
+        ConvMerediana = pnts_UTM[k+1][3]
+        Az_Geo_lista += [(180/pi)*azimute(pntA, pntB)[0]+ConvMerediana]
         Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
-    
+
     LINHAS = ''
     for k in range(tam):
         linha0 = linha
-        itens = {'Vn': 'M-' + str(k+1).zfill(3),
-                    'En': '{:,.2f}'.format(pnts_UTM[k].x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                    'Nn': '{:,.2f}'.format(pnts_UTM[k].y()).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                    'Ln': 'M-' + str(k+1).zfill(3) + '/' + 'M-' + str(max((k+2)%(tam+1),1)).zfill(3),
+        itens = {'Vn':pnts_UTM[k+1][1] + '-' + pnts_UTM[k+1][2],
+                    'En': '{:,.2f}'.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
+                    'Nn': '{:,.2f}'.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'),
+                    'Ln': pnts_UTM[k+1][1] + '-' + pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][1] + '-' + pnts_UTM[1 if k+2 > tam else k+2][2],
                     'Az_n': DD2DMS(Az_lista[k]).replace('.', ','),
                     'AzG_n':  DD2DMS(Az_Geo_lista[k]).replace('.', ','),
                     'Dn': '{:,.2f}'.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')

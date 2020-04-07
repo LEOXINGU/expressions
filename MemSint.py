@@ -290,7 +290,7 @@ def MemorialSintetico(layer_name, feature, parent):
     LINHAS = ''
     for k in range(tam):
         linha0 = linha
-        itens = {'Vn':pnts_UTM[k+1][1] + '-' + pnts_UTM[k+1][2],
+        itens = {'Vn': pnts_UTM[k+1][2],
                     'En': '{:,.2f}'.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
                     'Nn': '{:,.2f}'.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'),
                     'Ln': pnts_UTM[k+1][1] + '-' + pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][1] + '-' + pnts_UTM[1 if k+2 > tam else k+2][2],

@@ -162,7 +162,7 @@ texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
  style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
  align="center"><span
  style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">MEMORIAL
-DESCRITIVO SINT&Eacute;TICO<o:p></o:p></span></p>
+DESCRITIVO SINT&Eacute;TICO [TITULO]<o:p></o:p></span></p>
       </td>
     </tr>
     <tr style="">
@@ -253,14 +253,17 @@ DESCRITIVO SINT&Eacute;TICO<o:p></o:p></span></p>
 '''
 
 @qgsfunction(args='auto', group='Custom')
-def MemorialSintetico(layer_name, feature, parent):
+def MemorialSintetico(layer_name, ini, fim, titulo, feature, parent):
     """
-    Gera o memorial descritivo sintético a partir de uma camada de pontos do perímetro de um imóvel.
+    Gera o memorial descritivo sintético a partir de uma camada de pontos do perímetro de um imóvel e dos vértices inicial e final pretendido.
+    O título da tabela pode ser inserido como string.
     <h2>Examplo:</h2>
     <ul>
-      <li>MemorialSintetico('Vértices') ->[HTML]</li>
+      <li>MemorialSintetico('nome_camada', ini, fim, 'titulo') ->[HTML]</li>
+      <li>MemorialSintetico('Vértices', 1, 20, 'Area X') ->[HTML]</li>
     </ul>
     """
+    
     # Camada de Pontos
     layer = QgsProject.instance().mapLayersByName(layer_name)[0]
     SRC = layer.crs()
@@ -288,7 +291,9 @@ def MemorialSintetico(layer_name, feature, parent):
         Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
     LINHAS = ''
-    for k in range(tam):
+    if fim == -1 or fim > tam:
+        fim = tam
+    for k in range(ini-1,fim):
         linha0 = linha
         itens = {'Vn': pnts_UTM[k+1][2],
                     'En': '{:,.2f}'.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
@@ -301,6 +306,6 @@ def MemorialSintetico(layer_name, feature, parent):
         for item in itens:
             linha0 = linha0.replace(item, itens[item])
         LINHAS += linha0
-    resultado = texto.replace('[LINHAS]', LINHAS)
+    resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', titulo)
     
     return resultado

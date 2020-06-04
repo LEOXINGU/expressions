@@ -298,7 +298,7 @@ def MemorialSintetico(layer_name, ini, fim, titulo, feature, parent):
         itens = {'Vn': pnts_UTM[k+1][2],
                     'En': '{:,.2f}'.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
                     'Nn': '{:,.2f}'.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                    'Ln': pnts_UTM[k+1][1] + '-' + pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][1] + '-' + pnts_UTM[1 if k+2 > tam else k+2][2],
+                    'Ln': pnts_UTM[k+1][2] + ' / ' + pnts_UTM[1 if k+2 > tam else k+2][2],
                     'Az_n': DD2DMS(Az_lista[k]).replace('.', ','),
                     'AzG_n':  DD2DMS(Az_Geo_lista[k]).replace('.', ','),
                     'Dn': '{:,.2f}'.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')

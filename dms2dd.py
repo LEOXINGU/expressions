@@ -8,7 +8,7 @@ def dms2dd(txt, feature, parent):
     <h2>Example usage:</h2>
     <ul>
       <li>dms2dd("dms") -> dd</li>
-      <li>dms2dd('-10°30'00.0"') -> -10.5</li>
+      <li>dms2dd('-10d30m00.0s') -> -10.5</li>
     </ul>
     """
     txt = txt.replace(' ','').replace(',','.')

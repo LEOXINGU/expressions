@@ -131,7 +131,7 @@ def MemorialSintetico(layer_name, ini, fim, titulo, fontsize, feature, parent):
 </head>
 <body>
 <table
- style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Courier New;"
+ style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
  border="1" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>

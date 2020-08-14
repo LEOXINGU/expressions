@@ -2,27 +2,28 @@ from qgis.core import *
 from qgis.gui import *
 from math import atan, pi, sqrt
 import math
+from numpy import floor
 
 
 # Azimutes
 def azimute(A,B):
     # Cálculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
-    if ((B.x()-A.x())>=0 and (B.y()-A.y())>0): #1º quadrante
+    if ((B.x()-A.x())>=0 and (B.y()-A.y())>0): #1o quadrante
         AzAB=atan((B.x()-A.x())/(B.y()-A.y()))
         AzBA=AzAB+pi
-    elif ((B.x()-A.x())>0 and(B.y()-A.y())<0): #2º quadrante
+    elif ((B.x()-A.x())>0 and(B.y()-A.y())<0): #2o quadrante
         AzAB=pi+atan((B.x()-A.x())/(B.y()-A.y()))
         AzBA=AzAB+pi
-    elif ((B.x()-A.x())<=0 and(B.y()-A.y())<0): #3º quadrante
+    elif ((B.x()-A.x())<=0 and(B.y()-A.y())<0): #3o quadrante
         AzAB=atan((B.x()-A.x())/(B.y()-A.y()))+pi
         AzBA=AzAB-pi
-    elif ((B.x()-A.x())<0 and(B.y()-A.y())>0): #4º quadrante
+    elif ((B.x()-A.x())<0 and(B.y()-A.y())>0): #4o quadrante
         AzAB=2*pi+atan((B.x()-A.x())/(B.y()-A.y()))
         AzBA=AzAB+pi
-    elif ((B.x()-A.x())>0 and(B.y()-A.y())==0): # no eixo positivo de x (90º)
+    elif ((B.x()-A.x())>0 and(B.y()-A.y())==0): # no eixo positivo de x (90)
         AzAB=pi/2
         AzBA=1.5*pi
-    else: # ((B.x()-A.x())<0 and(B.y()-A.y())==0) # no eixo negativo de x (270º)
+    else: # ((B.x()-A.x())<0 and(B.y()-A.y())==0) # no eixo negativo de x (270)
         AzAB=1.5*pi
         AzBA=pi/2
     # Correção dos ângulos para o intervalo de 0 a 2pi
@@ -38,15 +39,32 @@ def azimute(A,B):
             AzBA=AzBA-2*pi
     return (AzAB, AzBA)
 
-# Graus Decimais para DMS
-def DD2DMS(dd):
-    is_positive = dd >= 0
-    dd = abs(dd)
-    minutes,seconds = divmod(dd*3600,60)
-    degrees,minutes = divmod(minutes,60)
-    degrees = str(int(degrees)) if is_positive else '-' + str(int(degrees))
-    minutes = int(minutes)
-    return degrees + "&deg;" + str(minutes).zfill(2) + "\'" + ("{:.1f}".format(seconds)).zfill(4) + '\"'
+# Graus Decimais para Graus, Minutos, Segundos (DMS)
+def dd2dms(dd, n_digits):
+    if dd != 0:
+        graus = int(floor(abs(dd)))
+        resto = round(abs(dd) - graus, 8)
+        if dd < 0:
+            texto = '-' + str(graus) + '&deg;'
+        else:
+            texto = str(graus) + '&deg;'
+        minutos = int(floor(60*resto))
+        resto = round(resto*60 - minutos, 10)
+        texto = texto + '{:02d}'.format(minutos) + '&apos;'
+        segundos = resto*60
+        if round(segundos,n_digits) == 60:
+            minutos += 1
+            segundos = 0
+        if minutos == 60:
+            graus += 1
+            minutos = 0
+        if n_digits < 1:
+            texto = texto + '{:02d}'.format(int(segundos)) + "&quot;"
+        else:
+            texto = texto + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(segundos) + "&quot;"
+        return texto
+    else:
+        return '0&deg;00&apos;' + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(0) +'&quot;'
 
 # Convergência Meridiana
 def ConvMer(pnt, SRC):
@@ -83,186 +101,64 @@ def SRC_Projeto(output_type):
     else:
         return b.description()
 
-linha = '''
-<tr style="">
-      <td
- style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0cm 5.4pt; width: 54.15pt;"
- width="72">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">Vn<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 78.35pt;"
- width="104">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">En<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 72.1pt;"
- width="96">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">Nn<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 130pt;"
- width="74">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">Ln<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 75.4pt;"
- width="101">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">Az_n<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 77.6pt;"
- width="103">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">AzG_n<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 68.9pt;"
- width="92">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">Dn<o:p></o:p></span></p>
-      </td>
+@qgsfunction(args='auto', group='Custom')
+def MemorialSintetico(layer_name, ini, fim, titulo, fontsize, feature, parent):
+    """
+    Gera o memorial descritivo sintetico a partir de uma camada de pontos do perimetro de um imovel e dos vertices inicial e final pretendido.
+    O titulo da tabela pode ser inserido como string.
+    <h2>Exemplo:</h2>
+    <ul>
+      <li>MemorialSintetico('nome_camada', ini, fim, 'titulo','fontsize') = HTML</li>
+      <li>MemorialSintetico('Vertices', 1, 20, 'Area X',10) = HTML</li>
+    </ul>
+    """
+    
+    # Templates HTML
+    linha = '''<tr>
+      <td>Vn</td>
+      <td>En</td>
+      <td>Nn</td>
+      <td>Ln</td>
+      <td>Az_n</td>
+      <td>AzG_n</td>
+      <td>Dn</td>
     </tr>
 '''
 
-texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+    texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 </head>
 <body>
-<table class="MsoTableGrid"
- style="border: medium none ; width: 481.7pt; border-collapse: collapse; margin-left: 4.8pt; margin-right: 4.8pt;"
- align="left" border="1" cellpadding="0"
- cellspacing="0" width="642">
+<table
+ style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
+ border="1" cellpadding="1" cellspacing="0">
   <tbody>
-    <tr style="">
-      <td colspan="7"
- style="border: 1pt solid windowtext; padding: 0cm 5.4pt; width: 481.7pt;"
- width="642">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">MEMORIAL
-DESCRITIVO SINT&Eacute;TICO [TITULO]<o:p></o:p></span></p>
-      </td>
+    <tr>
+      <td colspan="7" rowspan="1">MEMORIAL
+DESCRITIVO SINT&Eacute;TICO [TITULO]</td>
     </tr>
-    <tr style="">
-      <td rowspan="2"
- style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0cm 5.4pt; width: 54.15pt;"
- width="72">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">V&Eacute;RTICE<o:p></o:p></span></p>
-      </td>
-      <td colspan="2"
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 150.45pt;"
- width="201">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">COORDENADAS<o:p></o:p></span></p>
-      </td>
-      <td rowspan="2"
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 165pt;"
- width="74">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">LADO<o:p></o:p></span></p>
-      </td>
-      <td colspan="2"
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 153pt;"
- width="204">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">AZIMUTES<o:p></o:p></span></p>
-      </td>
-      <td rowspan="2"
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 68.9pt;"
- width="92">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">DIST&Acirc;NCIA<o:p></o:p></span></p>
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">(m)<o:p></o:p></span></p>
-      </td>
+    <tr>
+      <td colspan="1" rowspan="2">V&Eacute;RTICE</td>
+      <td colspan="2" rowspan="1">COORDENADAS</td>
+      <td colspan="1" rowspan="2">LADO</td>
+      <td colspan="2" rowspan="1">AZIMUTES</td>
+      <td colspan="1" rowspan="2">DIST&Acirc;NCIA<br>
+(m)</td>
     </tr>
-    <tr style="">
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 78.35pt;"
- width="104">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">E<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 72.1pt;"
- width="96">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">N<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 75.4pt;"
- width="101">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">PLANO<o:p></o:p></span></p>
-      </td>
-      <td
- style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 77.6pt;"
- width="103">
-      <p class="MsoNormal"
- style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span
- style="font-size: 10pt; font-family: &quot;Arial&quot;,sans-serif;">VERDADEIRO<o:p></o:p></span></p>
-      </td>
+    <tr>
+      <td>E</td>
+      <td>N</td>
+      <td>PLANO</td>
+      <td>VERDADEIRO</td>
     </tr>
-[LINHAS]
+    [LINHAS]
   </tbody>
 </table>
+<br>
 </body>
 </html>
 '''
-
-@qgsfunction(args='auto', group='Custom')
-def MemorialSintetico(layer_name, ini, fim, titulo, feature, parent):
-    """
-    Gera o memorial descritivo sintético a partir de uma camada de pontos do perímetro de um imóvel e dos vértices inicial e final pretendido.
-    O título da tabela pode ser inserido como string.
-    <h2>Examplo:</h2>
-    <ul>
-      <li>MemorialSintetico('nome_camada', ini, fim, 'titulo') ->[HTML]</li>
-      <li>MemorialSintetico('Vértices', 1, 20, 'Area X') ->[HTML]</li>
-    </ul>
-    """
     
     # Camada de Pontos
     layer = QgsProject.instance().mapLayersByName(layer_name)[0]
@@ -298,14 +194,14 @@ def MemorialSintetico(layer_name, ini, fim, titulo, feature, parent):
         itens = {'Vn': pnts_UTM[k+1][2],
                     'En': '{:,.2f}'.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
                     'Nn': '{:,.2f}'.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                    'Ln': pnts_UTM[k+1][2] + ' / ' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                    'Az_n': DD2DMS(Az_lista[k]).replace('.', ','),
-                    'AzG_n':  DD2DMS(Az_Geo_lista[k]).replace('.', ','),
+                    'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
+                    'Az_n': dd2dms(Az_lista[k],1).replace('.', ','),
+                    'AzG_n':  dd2dms(Az_Geo_lista[k],1).replace('.', ','),
                     'Dn': '{:,.2f}'.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')
                     }
         for item in itens:
             linha0 = linha0.replace(item, itens[item])
         LINHAS += linha0
-    resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', titulo)
+    resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', titulo).replace('[FONTSIZE]', str(fontsize))
     
     return resultado

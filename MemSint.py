@@ -7,7 +7,7 @@ from numpy import floor
 
 # Azimutes
 def azimute(A,B):
-    # Cálculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
+    # CÃ¡lculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
     if ((B.x()-A.x())>=0 and (B.y()-A.y())>0): #1o quadrante
         AzAB=atan((B.x()-A.x())/(B.y()-A.y()))
         AzBA=AzAB+pi
@@ -26,7 +26,7 @@ def azimute(A,B):
     else: # ((B.x()-A.x())<0 and(B.y()-A.y())==0) # no eixo negativo de x (270)
         AzAB=1.5*pi
         AzBA=pi/2
-    # Correção dos ângulos para o intervalo de 0 a 2pi
+    # CorreÃ§Ã£o dos Ã¢ngulos para o intervalo de 0 a 2pi
     if AzAB<0 or AzAB>2*pi:
         if (AzAB<0):
            AzAB=AzAB+2*pi
@@ -66,7 +66,7 @@ def dd2dms(dd, n_digits):
     else:
         return '0&deg;00&apos;' + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(0) +'&quot;'
 
-# Convergência Meridiana
+# ConvergÃªncia Meridiana
 def ConvMer(pnt, SRC):
     lon = pnt.x()
     lat = pnt.y()
@@ -132,7 +132,7 @@ def MemorialSintetico(layer_name, ini, fim, titulo, fontsize, feature, parent):
 <body>
 <table
  style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
- border="1" cellpadding="1" cellspacing="0">
+ border="1" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
       <td colspan="7" rowspan="1">MEMORIAL
@@ -165,7 +165,7 @@ DESCRITIVO SINT&Eacute;TICO [TITULO]</td>
     SRC = layer.crs()
     pnts_UTM = {}
 
-    # Transformação de Coordenadas Geográficas para Projetadas no sistema UTM
+    # TransformaÃ§Ã£o de Coordenadas GeogrÃ¡ficas para Projetadas no sistema UTM
     crsDest = QgsCoordinateReferenceSystem(SRC_Projeto('EPSG'))
     coordinateTransformer = QgsCoordinateTransform()
     coordinateTransformer.setDestinationCrs(crsDest)
@@ -175,7 +175,7 @@ DESCRITIVO SINT&Eacute;TICO [TITULO]</td>
         pnt = feat.geometry().asMultiPoint()[0]
         pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], ConvMer(pnt, crsDest) ]
 
-    # Cálculo dos Azimutes e Distâncias
+    # CÃ¡lculo dos Azimutes e DistÃ¢ncias
     tam = len(pnts_UTM)
     Az_lista, Az_Geo_lista, Dist = [], [], []
     for k in range(tam):

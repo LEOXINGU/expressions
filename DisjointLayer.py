@@ -11,7 +11,10 @@ def DisjointLayer(layer_name, feature, parent):
         </ul>'''
     Situation = False
     geom = feature.geometry()
-    layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
     for feat in layer.getFeatures():
             if geom.intersects(feat.geometry()):
                     Situation = True

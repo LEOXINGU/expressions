@@ -19,7 +19,10 @@ def Model_class(layer_id, not_rela, feature, parent):
     </ul>
     """
     
-    layer = QgsProject.instance().mapLayer(layer_id)
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
     nao_rela = list(not_rela)
 
     # ler nome da classe

@@ -2,3 +2,17 @@
 __pycache__/AggregateLayerData.cpython-37.pyc
 __pycache__/WithinLayer.cpython-37.pyc
 *.pyc
+*.pyc
+*.pyc
+__pycache__/AggregateLayerData.cpython-37.pyc
+__pycache__/Azimuth.cpython-37.pyc
+__pycache__/ChartDimensions.cpython-37.pyc
+__pycache__/Diferenca.cpython-37.pyc
+__pycache__/FatorEscalaK.cpython-37.pyc
+__pycache__/IntersectsLayer.cpython-37.pyc
+__pycache__/MeridianConverge.cpython-37.pyc
+__pycache__/ProjectCRS.cpython-37.pyc
+__pycache__/Soma.cpython-37.pyc
+__pycache__/WithinLayer.cpython-37.pyc
+__pycache__/AggregateLayerData.cpython-37.pyc
+*.pyc
